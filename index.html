@@ -1,0 +1,2039 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NYC People's Money Data Story</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=DM+Sans:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+      :root {
+        --ink: #1a1a1a;
+        --ink-light: #444;
+        --paper: #faf8f4;
+        --paper-warm: #f5f0e8;
+        --rule: #d4c9b0;
+        --accent-red: #c0392b;
+        --accent-teal: #1a7a6b;
+        --accent-gold: #b8860b;
+        --accent-blue: #2c5f8a;
+        --pull-bg: #1a1a1a;
+        --pull-fg: #faf8f4;
+        --col-width: 680px;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        background: var(--paper);
+        color: var(--ink);
+        font-family: "Source Serif 4", Georgia, serif;
+        font-size: 18px;
+        line-height: 1.75;
+        overflow-x: hidden;
+      }
+
+      /* ── PROGRESS BAR ── */
+      #progress-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 3px;
+        background: var(--accent-red);
+        width: 0%;
+        z-index: 9999;
+        transition: width 0.1s linear;
+      }
+
+      /* ── TOP NAV ── */
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: rgba(250, 248, 244, 0.96);
+        backdrop-filter: blur(8px);
+        border-bottom: 1px solid var(--rule);
+        z-index: 1000;
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 52px;
+      }
+      .nav-brand {
+        font-family: "Playfair Display", serif;
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        color: var(--ink);
+        text-decoration: none;
+      }
+      .nav-links {
+        display: flex;
+        gap: 24px;
+        list-style: none;
+      }
+      .nav-links a {
+        font-family: "DM Sans", sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ink-light);
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+      .nav-links a:hover {
+        color: var(--accent-red);
+      }
+
+      /* ── HERO ── */
+      .hero {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 80px 40px 60px;
+        position: relative;
+        overflow: hidden;
+        background: var(--ink);
+      }
+
+      .hero-bg-pattern {
+        position: absolute;
+        inset: 0;
+        background-image:
+          repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 39px,
+            rgba(255, 255, 255, 0.04) 39px,
+            rgba(255, 255, 255, 0.04) 40px
+          ),
+          repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 39px,
+            rgba(255, 255, 255, 0.04) 39px,
+            rgba(255, 255, 255, 0.04) 40px
+          );
+        z-index: 0;
+      }
+
+      .hero-eyebrow {
+        font-family: "DM Sans", sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--accent-red);
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 1;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeUp 0.8s ease forwards 0.2s;
+      }
+
+      .hero h1 {
+        font-family: "Playfair Display", serif;
+        font-size: clamp(48px, 8vw, 96px);
+        font-weight: 900;
+        line-height: 1;
+        color: var(--paper);
+        max-width: 900px;
+        position: relative;
+        z-index: 1;
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeUp 0.9s ease forwards 0.4s;
+      }
+
+      .hero h1 em {
+        font-style: italic;
+        color: var(--accent-red);
+      }
+
+      .hero-rule {
+        width: 60px;
+        height: 3px;
+        background: var(--accent-red);
+        margin: 32px 0;
+        position: relative;
+        z-index: 1;
+        opacity: 0;
+        animation: fadeUp 0.8s ease forwards 0.7s;
+      }
+
+      .hero-deck {
+        font-size: 20px;
+        line-height: 1.6;
+        color: rgba(250, 248, 244, 0.8);
+        max-width: 620px;
+        position: relative;
+        z-index: 1;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeUp 0.8s ease forwards 0.9s;
+      }
+
+      .hero-meta {
+        margin-top: 40px;
+        display: flex;
+        gap: 32px;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+        opacity: 0;
+        animation: fadeUp 0.8s ease forwards 1.1s;
+        flex-wrap: wrap;
+      }
+      .hero-meta-item {
+        font-family: "DM Sans", sans-serif;
+        font-size: 12px;
+        color: rgba(250, 248, 244, 0.5);
+        letter-spacing: 0.06em;
+      }
+      .hero-meta-item strong {
+        display: block;
+        color: rgba(250, 248, 244, 0.85);
+        font-size: 13px;
+        margin-bottom: 2px;
+      }
+
+      .scroll-cue {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        opacity: 0;
+        animation: fadeUp 0.8s ease forwards 1.5s;
+      }
+      .scroll-cue span {
+        font-family: "DM Sans", sans-serif;
+        font-size: 10px;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: rgba(250, 248, 244, 0.4);
+      }
+      .scroll-arrow {
+        width: 20px;
+        height: 20px;
+        border-right: 2px solid rgba(250, 248, 244, 0.3);
+        border-bottom: 2px solid rgba(250, 248, 244, 0.3);
+        transform: rotate(45deg);
+        animation: bounce 1.5s ease infinite;
+      }
+
+      /* ── STAT BAR ── */
+      .stat-bar {
+        background: var(--accent-red);
+        padding: 28px 40px;
+        display: flex;
+        justify-content: center;
+        gap: 0;
+        overflow: hidden;
+      }
+      .stat-item {
+        text-align: center;
+        padding: 0 48px;
+        border-right: 1px solid rgba(255, 255, 255, 0.25);
+        flex: 1;
+        max-width: 220px;
+      }
+      .stat-item:last-child {
+        border-right: none;
+      }
+      .stat-number {
+        font-family: "Playfair Display", serif;
+        font-size: 44px;
+        font-weight: 900;
+        color: white;
+        line-height: 1;
+        display: block;
+      }
+      .stat-label {
+        font-family: "DM Sans", sans-serif;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.75);
+        margin-top: 6px;
+        display: block;
+      }
+
+      /* ── LAYOUT ── */
+      .section {
+        padding: 80px 40px;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      .col-text {
+        max-width: var(--col-width);
+        margin: 0 auto;
+      }
+
+      /* ── SECTION LABELS ── */
+      .section-label {
+        font-family: "DM Sans", sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--accent-red);
+        border-top: 2px solid var(--accent-red);
+        padding-top: 10px;
+        margin-bottom: 28px;
+        display: inline-block;
+      }
+
+      /* ── TYPOGRAPHY ── */
+      h2.section-head {
+        font-family: "Playfair Display", serif;
+        font-size: clamp(32px, 4vw, 52px);
+        font-weight: 700;
+        line-height: 1.15;
+        margin-bottom: 24px;
+        color: var(--ink);
+      }
+      h2.section-head em {
+        font-style: italic;
+        color: var(--accent-red);
+      }
+
+      h3.subsection-head {
+        font-family: "Playfair Display", serif;
+        font-size: 26px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        color: var(--ink);
+      }
+
+      p {
+        margin-bottom: 20px;
+        color: var(--ink-light);
+      }
+      p:last-child {
+        margin-bottom: 0;
+      }
+
+      /* ── DROPCAP ── */
+      .dropcap::first-letter {
+        float: left;
+        font-family: "Playfair Display", serif;
+        font-size: 72px;
+        line-height: 0.8;
+        margin: 4px 12px 0 0;
+        color: var(--ink);
+        font-weight: 900;
+      }
+
+      /* ── PULL QUOTE ── */
+      .pull-quote {
+        background: var(--pull-bg);
+        color: var(--pull-fg);
+        padding: 52px 60px;
+        margin: 60px -40px;
+        position: relative;
+      }
+      .pull-quote::before {
+        content: "\201C";
+        font-family: "Playfair Display", serif;
+        font-size: 140px;
+        line-height: 0.7;
+        color: var(--accent-red);
+        position: absolute;
+        top: 28px;
+        left: 32px;
+        opacity: 0.4;
+      }
+      .pull-quote p {
+        font-family: "Playfair Display", serif;
+        font-size: clamp(22px, 3vw, 32px);
+        font-style: italic;
+        line-height: 1.4;
+        color: var(--pull-fg);
+        max-width: 700px;
+        margin: 0 0 16px;
+        position: relative;
+        z-index: 1;
+      }
+      .pull-quote cite {
+        font-family: "DM Sans", sans-serif;
+        font-size: 12px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: rgba(250, 248, 244, 0.5);
+      }
+
+      /* ── ROSA TIMELINE ── */
+      .rosa-section {
+        background: var(--paper-warm);
+        border-top: 1px solid var(--rule);
+        border-bottom: 1px solid var(--rule);
+        padding: 80px 40px;
+      }
+
+      .rosa-grid {
+        max-width: 1000px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 60px;
+        align-items: start;
+      }
+
+      .rosa-profile {
+        position: sticky;
+        top: 80px;
+        text-align: center;
+      }
+
+      .rosa-avatar {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        background-image: url("./images/gma.jpg");
+        background-size: cover;
+        background-position: center;
+        margin: 0 auto 20px;
+        border: 4px solid var(--accent-red);
+      }
+
+      .rosa-name {
+        font-family: "Playfair Display", serif;
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .rosa-tag {
+        font-family: "DM Sans", sans-serif;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ink-light);
+      }
+      .rosa-badge {
+        display: inline-block;
+        margin-top: 16px;
+        background: var(--accent-red);
+        color: white;
+        font-family: "DM Sans", sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 6px 14px;
+        border-radius: 2px;
+      }
+
+      .timeline {
+        position: relative;
+        padding-left: 28px;
+      }
+      .timeline::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 8px;
+        bottom: 8px;
+        width: 2px;
+        background: var(--rule);
+      }
+
+      .timeline-item {
+        position: relative;
+        margin-bottom: 40px;
+        opacity: 0;
+        transform: translateX(20px);
+        transition: all 0.6s ease;
+      }
+      .timeline-item.visible {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      .timeline-item::before {
+        content: "";
+        position: absolute;
+        left: -34px;
+        top: 6px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--accent-red);
+        border: 2px solid var(--paper-warm);
+        box-shadow: 0 0 0 2px var(--accent-red);
+      }
+
+      .timeline-time {
+        font-family: "DM Sans", sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--accent-red);
+        margin-bottom: 6px;
+      }
+      .timeline-text {
+        color: var(--ink);
+        font-size: 17px;
+        line-height: 1.65;
+      }
+
+      /* ── DOMAIN CARDS ── */
+      .domains-section {
+        padding: 80px 40px;
+        background: white;
+      }
+      .domains-section .section-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      .domain-block {
+        display: grid;
+        grid-template-columns: 1fr 1.4fr;
+        gap: 60px;
+        align-items: center;
+        padding: 60px 0;
+        border-top: 1px solid var(--rule);
+        opacity: 0;
+        transform: translateY(40px);
+        transition: all 0.7s ease;
+      }
+      .domain-block.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .domain-block:nth-child(even) {
+        direction: rtl;
+      }
+      .domain-block:nth-child(even) > * {
+        direction: ltr;
+      }
+
+      .domain-number {
+        font-family: "Playfair Display", serif;
+        font-size: 100px;
+        font-weight: 900;
+        line-height: 1;
+        color: rgba(0, 0, 0, 0.06);
+        margin-bottom: -20px;
+      }
+
+      .domain-tag {
+        font-family: "DM Sans", sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--accent-teal);
+        margin-bottom: 12px;
+      }
+      .domain-block:nth-child(2) .domain-tag {
+        color: var(--accent-red);
+      }
+      .domain-block:nth-child(3) .domain-tag {
+        color: var(--accent-blue);
+      }
+
+      .domain-block h3 {
+        font-family: "Playfair Display", serif;
+        font-size: 32px;
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 20px;
+      }
+
+      .domain-stat-callout {
+        background: var(--paper-warm);
+        border-left: 4px solid currentColor;
+        padding: 20px 24px;
+        margin-top: 20px;
+        border-radius: 0 4px 4px 0;
+      }
+      .domain-block:nth-child(1) .domain-stat-callout {
+        color: var(--accent-teal);
+        border-left-color: var(--accent-teal);
+      }
+      .domain-block:nth-child(2) .domain-stat-callout {
+        color: var(--accent-red);
+        border-left-color: var(--accent-red);
+      }
+      .domain-block:nth-child(3) .domain-stat-callout {
+        color: var(--accent-blue);
+        border-left-color: var(--accent-blue);
+      }
+
+      .domain-stat-callout .big-num {
+        font-family: "Playfair Display", serif;
+        font-size: 48px;
+        font-weight: 900;
+        line-height: 1;
+        display: block;
+      }
+      .domain-stat-callout .big-label {
+        font-family: "DM Sans", sans-serif;
+        font-size: 13px;
+        color: var(--ink-light);
+        margin-top: 4px;
+      }
+
+      .chart-wrap {
+        background: #fafafa;
+        border: 1px solid #eee;
+        border-radius: 4px;
+        padding: 24px;
+        position: relative;
+      }
+      .chart-title {
+        font-family: "DM Sans", sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ink-light);
+        margin-bottom: 16px;
+        text-align: center;
+      }
+      canvas {
+        max-width: 100%;
+      }
+
+      /* ── TREND SECTION ── */
+      .trend-section {
+        background: var(--ink);
+        color: var(--paper);
+        padding: 80px 40px;
+      }
+      .trend-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 80px;
+        align-items: center;
+      }
+      .trend-section .section-label {
+        color: #e87070;
+        border-top-color: #e87070;
+      }
+      .trend-section h2.section-head {
+        color: var(--paper);
+      }
+      .trend-section p {
+        color: rgba(250, 248, 244, 0.7);
+      }
+
+      .trend-facts {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        margin-top: 32px;
+      }
+      .trend-fact {
+        background: rgba(255, 255, 255, 0.06);
+        border-left: 3px solid var(--accent-red);
+        padding: 18px 22px;
+        border-radius: 0 4px 4px 0;
+        opacity: 0;
+        transform: translateX(-20px);
+        transition: all 0.5s ease;
+      }
+      .trend-fact.visible {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      .trend-fact-number {
+        font-family: "Playfair Display", serif;
+        font-size: 36px;
+        font-weight: 900;
+        color: var(--accent-red);
+        display: block;
+        line-height: 1;
+        margin-bottom: 4px;
+      }
+      .trend-fact-text {
+        font-family: "DM Sans", sans-serif;
+        font-size: 14px;
+        color: rgba(250, 248, 244, 0.7);
+        line-height: 1.5;
+      }
+
+      /* ── BUSHWICK SPOTLIGHT ── */
+      .bushwick-section {
+        padding: 80px 40px;
+        background: var(--paper-warm);
+        border-top: 1px solid var(--rule);
+      }
+
+      .bushwick-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      .neighborhoods-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1px;
+        background: var(--rule);
+        border: 1px solid var(--rule);
+        margin-top: 40px;
+        overflow: hidden;
+        border-radius: 4px;
+      }
+
+      .neighborhood-card {
+        background: white;
+        padding: 28px 24px;
+        transition: background 0.2s;
+        cursor: default;
+        opacity: 0;
+        transform: translateY(20px);
+        transition:
+          opacity 0.5s ease,
+          transform 0.5s ease,
+          background 0.2s;
+      }
+      .neighborhood-card.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .neighborhood-card:hover {
+        background: #fdf9f4;
+      }
+      .neighborhood-card.highlight {
+        background: var(--ink);
+      }
+      .neighborhood-card.highlight:hover {
+        background: #2a2a2a;
+      }
+
+      .nbhd-name {
+        font-family: "Playfair Display", serif;
+        font-size: 17px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: var(--ink);
+      }
+      .neighborhood-card.highlight .nbhd-name {
+        color: var(--paper);
+      }
+      .neighborhood-card.highlight .nbhd-tag {
+        color: rgba(250, 248, 244, 0.5);
+      }
+      .neighborhood-card.highlight .nbhd-num {
+        color: var(--accent-red);
+      }
+
+      .nbhd-num {
+        font-family: "Playfair Display", serif;
+        font-size: 38px;
+        font-weight: 900;
+        color: var(--accent-teal);
+        line-height: 1;
+        display: block;
+      }
+      .nbhd-tag {
+        font-family: "DM Sans", sans-serif;
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        color: var(--ink-light);
+        margin-top: 4px;
+      }
+
+      /* ── RECOMMENDATIONS ── */
+      .recs-section {
+        padding: 80px 40px;
+        background: white;
+      }
+      .recs-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      .recs-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 28px;
+        margin-top: 48px;
+      }
+
+      .rec-card {
+        border: 1px solid var(--rule);
+        padding: 36px 28px;
+        position: relative;
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.6s ease;
+        background: var(--paper);
+      }
+      .rec-card.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .rec-card:hover {
+        border-color: var(--ink);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+      }
+
+      .rec-num {
+        font-family: "Playfair Display", serif;
+        font-size: 64px;
+        font-weight: 900;
+        line-height: 1;
+        color: rgba(0, 0, 0, 0.05);
+        margin-bottom: 16px;
+      }
+      .rec-domain {
+        font-family: "DM Sans", sans-serif;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+      }
+      .rec-card:nth-child(1) .rec-domain {
+        color: var(--accent-teal);
+      }
+      .rec-card:nth-child(2) .rec-domain {
+        color: var(--accent-red);
+      }
+      .rec-card:nth-child(3) .rec-domain {
+        color: var(--accent-blue);
+      }
+
+      .rec-card h4 {
+        font-family: "Playfair Display", serif;
+        font-size: 21px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        line-height: 1.3;
+      }
+      .rec-card ul {
+        list-style: none;
+        padding: 0;
+      }
+      .rec-card li {
+        font-family: "DM Sans", sans-serif;
+        font-size: 14px;
+        color: var(--ink-light);
+        line-height: 1.55;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--rule);
+        padding-left: 16px;
+        position: relative;
+      }
+      .rec-card li:last-child {
+        border-bottom: none;
+      }
+      .rec-card li::before {
+        content: "→";
+        position: absolute;
+        left: 0;
+        color: var(--accent-red);
+        font-size: 12px;
+      }
+
+      /* ── CLOSING CTA ── */
+      .closing-section {
+        background: var(--ink);
+        color: var(--paper);
+        padding: 100px 40px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .closing-section::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image:
+          repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 39px,
+            rgba(255, 255, 255, 0.02) 39px,
+            rgba(255, 255, 255, 0.02) 40px
+          ),
+          repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 39px,
+            rgba(255, 255, 255, 0.02) 39px,
+            rgba(255, 255, 255, 0.02) 40px
+          );
+      }
+      .closing-inner {
+        position: relative;
+        z-index: 1;
+        max-width: 700px;
+        margin: 0 auto;
+      }
+      .closing-section h2 {
+        font-family: "Playfair Display", serif;
+        font-size: clamp(36px, 5vw, 60px);
+        font-weight: 900;
+        line-height: 1.1;
+        color: var(--paper);
+        margin-bottom: 28px;
+      }
+      .closing-section h2 em {
+        font-style: italic;
+        color: var(--accent-red);
+      }
+      .closing-section p {
+        color: rgba(250, 248, 244, 0.7);
+        font-size: 19px;
+        line-height: 1.7;
+        margin-bottom: 20px;
+      }
+      .closing-section p strong {
+        color: var(--paper);
+        font-weight: 600;
+      }
+
+      .cta-btn {
+        display: inline-block;
+        margin-top: 36px;
+        background: var(--accent-red);
+        color: white;
+        font-family: "DM Sans", sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 16px 36px;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        transition:
+          background 0.2s,
+          transform 0.2s;
+      }
+      .cta-btn:hover {
+        background: #a93226;
+        transform: translateY(-2px);
+      }
+
+      /* ── FOOTER ── */
+      footer {
+        background: #111;
+        color: rgba(255, 255, 255, 0.4);
+        padding: 40px;
+        text-align: center;
+      }
+      footer p {
+        font-family: "DM Sans", sans-serif;
+        font-size: 12px;
+        letter-spacing: 0.06em;
+        color: rgba(255, 255, 255, 0.4);
+        margin-bottom: 6px;
+      }
+      footer a {
+        color: rgba(255, 255, 255, 0.5);
+        text-decoration: none;
+      }
+      footer a:hover {
+        color: white;
+      }
+
+      /* ── INTERACTIVE TABS (Neighborhoods) ── */
+      .tab-btns {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 0;
+        flex-wrap: wrap;
+      }
+      .tab-btn {
+        font-family: "DM Sans", sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 10px 20px;
+        border: 1px solid var(--rule);
+        background: white;
+        cursor: pointer;
+        color: var(--ink-light);
+        transition: all 0.2s;
+      }
+      .tab-btn.active {
+        background: var(--ink);
+        color: white;
+        border-color: var(--ink);
+      }
+      .tab-btn:hover:not(.active) {
+        background: var(--paper-warm);
+      }
+
+      .tab-content {
+        display: none;
+        background: #fafafa;
+        border: 1px solid var(--rule);
+        border-top: none;
+        padding: 28px;
+      }
+      .tab-content.active {
+        display: block;
+      }
+
+      /* ── ANIMATIONS ── */
+      @keyframes fadeUp {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: rotate(45deg) translateY(0);
+        }
+        50% {
+          transform: rotate(45deg) translateY(6px);
+        }
+      }
+
+      .fade-in {
+        opacity: 0;
+        transform: translateY(30px);
+        transition:
+          opacity 0.7s ease,
+          transform 0.7s ease;
+      }
+      .fade-in.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* ── DIVIDER ── */
+      .section-divider {
+        max-width: 1100px;
+        margin: 0 auto;
+        height: 1px;
+        background: var(--rule);
+      }
+
+      /* ── DATA NOTE ── */
+      .data-note {
+        font-family: "DM Sans", sans-serif;
+        font-size: 12px;
+        color: #999;
+        border-top: 1px solid #eee;
+        padding-top: 12px;
+        margin-top: 16px;
+        font-style: italic;
+      }
+
+      /* ── RESPONSIVE ── */
+      @media (max-width: 768px) {
+        nav .nav-links {
+          display: none;
+        }
+        .hero {
+          padding: 80px 24px 60px;
+        }
+        .pull-quote {
+          margin: 40px -24px;
+          padding: 40px 28px;
+        }
+        .pull-quote::before {
+          font-size: 80px;
+          left: 16px;
+          top: 16px;
+        }
+        .stat-bar {
+          flex-wrap: wrap;
+          padding: 24px;
+        }
+        .stat-item {
+          max-width: none;
+          border-right: none;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+          padding: 16px 0;
+          flex: 0 0 50%;
+        }
+        .stat-item:nth-child(odd) {
+          border-right: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .stat-item:last-child,
+        .stat-item:nth-last-child(2):nth-child(odd) {
+          border-bottom: none;
+        }
+        .rosa-grid {
+          grid-template-columns: 1fr;
+        }
+        .rosa-profile {
+          position: static;
+        }
+        .domain-block {
+          grid-template-columns: 1fr;
+        }
+        .domain-block:nth-child(even) {
+          direction: ltr;
+        }
+        .trend-inner {
+          grid-template-columns: 1fr;
+        }
+        .recs-grid {
+          grid-template-columns: 1fr;
+        }
+        .section {
+          padding: 60px 24px;
+        }
+        .rosa-section,
+        .domains-section,
+        .trend-section,
+        .bushwick-section,
+        .recs-section {
+          padding: 60px 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="progress-bar"></div>
+
+    <nav>
+      <a class="nav-brand" href="#">People's Money Project</a>
+      <ul class="nav-links">
+        <li><a href="#rosa">Rosa's Story</a></li>
+        <li><a href="#domains">The Data</a></li>
+        <li><a href="#trends">Trends</a></li>
+        <li><a href="#bushwick">Neighborhoods</a></li>
+        <li><a href="#action">Take Action</a></li>
+      </ul>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-bg-pattern"></div>
+      <div class="hero-eyebrow">NYC Community Data Story · March 27, 2026</div>
+      <h1>Unheard Needs,<br /><em>Unequal</em> Burdens</h1>
+      <div class="hero-rule"></div>
+      <p class="hero-deck">
+        Three years of community voices on health inequity in New York City
+        analyzed through 8,142 proposals to the People's Money Program,
+        revealing where the system is failing the people it was built to serve.
+      </p>
+      <div class="hero-meta">
+        <div class="hero-meta-item">
+          <strong>Preethi Sridhar, Samiha Akter &amp; Soad Hossain</strong>Team
+          10 · NYC Datathon 2026
+        </div>
+        <div class="hero-meta-item">
+          <strong>8,142</strong>Total Proposals Analyzed
+        </div>
+        <div class="hero-meta-item">
+          <strong>3 Years</strong>People's Money Program
+        </div>
+        <div class="hero-meta-item">
+          <strong>Our 3 SDOH Domains</strong>Economic · Healthcare · Environment
+        </div>
+      </div>
+      <div class="scroll-cue">
+        <span>Scroll</span>
+        <div class="scroll-arrow"></div>
+      </div>
+    </section>
+
+    <!-- STAT BAR -->
+    <div class="stat-bar">
+      <div class="stat-item">
+        <span class="stat-number" data-target="2202">0</span>
+        <span class="stat-label">Year 1 Proposals</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number" data-target="1945">0</span>
+        <span class="stat-label">Year 2 Proposals</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number" data-target="3995">0</span>
+        <span class="stat-label">Year 3 Proposals</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number" data-target="8142">0</span>
+        <span class="stat-label">Total Voices Heard</span>
+      </div>
+    </div>
+
+    <!-- INTRODUCTION -->
+    <section class="section" id="intro">
+      <div class="col-text">
+        <span class="section-label fade-in">The Problem</span>
+        <h2 class="section-head fade-in">
+          What happens when communities keep asking<br /><em
+            >for the same things</em
+          >
+          year after year?
+        </h2>
+        <p class="dropcap fade-in">
+          New York City's People's Money Program gives residents a rare
+          opportunity: the chance to tell their government exactly what their
+          neighborhoods need, and propose how public funds should be spent to
+          fix it. When analyzed through the lens of Social Determinants of
+          Health: the conditions in which people live, work, and age. These
+          proposals don't just reveal policy gaps, they reveal a city in which
+          some neighborhoods carry a burden that never lifts.
+        </p>
+        <p class="fade-in">
+          Our team used Python to parse three years of People's Money data,
+          tagging 5,367 proposals across three SDOH domains: Economic Stability,
+          Healthcare Access &amp; Quality, and Neighborhood &amp; Built
+          Environment. The patterns that emerged are not subtle.
+        </p>
+        <p class="fade-in">
+          The same neighborhoods. The same needs. Three years running.
+        </p>
+      </div>
+    </section>
+
+    <!-- PULL QUOTE -->
+    <div class="col-text" style="max-width: 1100px; margin: 0 auto">
+      <div class="pull-quote fade-in">
+        <p>
+          These proposals don't just reveal policy gaps. They reveal a city in
+          which some neighborhoods carry a burden that never lifts.
+        </p>
+        <cite>— Three Years of NYC People's Money Data</cite>
+      </div>
+    </div>
+
+    <!-- ROSA -->
+    <section class="rosa-section" id="rosa">
+      <div class="rosa-grid">
+        <div class="rosa-profile fade-in">
+          <div class="rosa-avatar"></div>
+          <div class="rosa-name">Meet Rosa</div>
+          <div class="rosa-tag">72 years old · Bushwick, Brooklyn</div>
+          <div class="rosa-badge">A Hypothetical NYC Resident</div>
+          <p
+            style="
+              margin-top: 20px;
+              font-size: 14px;
+              color: var(--ink-light);
+              font-family: &quot;DM Sans&quot;, sans-serif;
+              line-height: 1.6;
+            "
+          >
+            Rosa is fictional, but her circumstances are drawn directly from the
+            data. Thousands of New Yorkers share her story.
+          </p>
+        </div>
+        <div>
+          <span class="section-label">A Day in Rosa's Life</span>
+          <h2 class="section-head" style="font-size: 32px">
+            Every day is a negotiation<br /><em>between need and survival.</em>
+          </h2>
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-time">7:00 AM</div>
+              <div class="timeline-text">
+                Rosa wakes up in her Bushwick apartment. The nearest grocery
+                store closed last year, the bodega around the corner doesn't
+                carry fresh produce.
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-time">10:00 AM</div>
+              <div class="timeline-text">
+                She needs to see her doctor across town. The bus stop curb cuts
+                are broken and her walker gets stuck every single time. She's
+                filed three complaints.
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-time">2:00 PM</div>
+              <div class="timeline-text">
+                She skips her prescription refill. The $40 copay is money she
+                doesn't have this week after paying rent. She'll just try again
+                next month.
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-time">Evening</div>
+              <div class="timeline-text">
+                She submits a People's Money proposal for a community health
+                clinic, a food pantry, and repaired sidewalks.
+                <strong>Again.</strong> Like she did last year. And the year
+                before.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DOMAINS -->
+    <section class="domains-section" id="domains">
+      <div class="section-inner">
+        <div class="col-text" style="margin-bottom: 20px">
+          <span class="section-label fade-in">The Data</span>
+          <h2 class="section-head fade-in">
+            Three domains & Consistent stories of <em>unmet needs.</em>
+          </h2>
+        </div>
+
+        <!-- Domain 1: Economic Stability -->
+        <div class="domain-block">
+          <div>
+            <div class="domain-number">01</div>
+            <div class="domain-tag">Economic Stability</div>
+            <h3>
+              Food, housing, and financial security: the foundations of health
+            </h3>
+            <p>
+              Economic instability is a foundational driver of poor health.
+              Access to nutritious food, stable housing, and financial security
+              are prerequisites for overall well-being, yet they remain out of
+              reach for thousands of New Yorkers.
+            </p>
+            <p>
+              Many people like Rosa are in this data. Food insecurity, housing
+              instability, and lack of financial resources compound to create
+              cycles of poor health that are extremely difficult to escape.
+            </p>
+            <div class="domain-stat-callout">
+              <span class="big-num">3×</span>
+              <span class="big-label"
+                >Surge in Economic proposals from Year 1 to Year 3: the
+                community's cry for help is growing louder.</span
+              >
+            </div>
+            <p class="data-note">
+              *Year 2's data excludes social services, education, civic
+              engagement, and arts &amp; culture, explaining the dip.
+            </p>
+          </div>
+          <div class="chart-wrap">
+            <div class="chart-title">
+              Top Economic Proposals by Neighborhood (Year 1–3)
+            </div>
+            <canvas id="economicChart" height="280"></canvas>
+          </div>
+        </div>
+
+        <!-- Domain 2: Healthcare Access -->
+        <div class="domain-block">
+          <div>
+            <div class="domain-number">02</div>
+            <div class="domain-tag">Healthcare Access &amp; Quality</div>
+            <h3>A system built for some, out of reach for many.</h3>
+            <p>
+              Approximately 1 in 10 Americans lacks health insurance, leading to
+              delayed treatment and worsening chronic conditions. The barriers
+              fall hardest on older adults (like Rosa), geographic distance from
+              providers, unaffordable copayments, and confusing enrollment
+              processes.
+            </p>
+            <div class="domain-stat-callout">
+              <span class="big-num">10×</span>
+              <span class="big-label"
+                >Jamaica submitted the highest healthcare proposals of any
+                single neighborhood in Year 1: a signal impossible to
+                ignore.</span
+              >
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <div class="chart-title">
+              Top Healthcare Proposals by Neighborhood (Year 1–3)
+            </div>
+            <canvas id="healthChart" height="280"></canvas>
+          </div>
+        </div>
+
+        <!-- Domain 3: Built Environment -->
+        <div class="domain-block">
+          <div>
+            <div class="domain-number">03</div>
+            <div class="domain-tag">Neighborhood &amp; Built Environment</div>
+            <h3>Where you live shapes how long you live.</h3>
+            <p>
+              The physical environment profoundly affects health behaviors,
+              safety, and mobility. Many low-income neighborhoods lack
+              wheelchair-accessible transit, well-maintained sidewalks, adequate
+              lighting, and fall-prevention infrastructure.
+            </p>
+            <p>
+              According to Healthy People 2030, fall-related deaths are highest
+              among adults 85+. Rosa's broken curb cuts aren't a minor
+              inconvenience, they are a life-threatening infrastructure failure.
+            </p>
+            <div class="domain-stat-callout">
+              <span class="big-num">67</span>
+              <span class="big-label"
+                >Built environment proposals from Hunts Point &amp; Longwood
+                alone, the highest of any neighborhood.</span
+              >
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <div class="chart-title">
+              Top Built Env't Proposals by Neighborhood (Year 1–3)
+            </div>
+            <canvas id="envChart" height="280"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TREND SECTION -->
+    <section class="trend-section" id="trends">
+      <div class="trend-inner">
+        <div>
+          <span class="section-label">3-Year Trend</span>
+          <h2 class="section-head">
+            Voices growing louder.<br /><em>Needs remain unmet.</em>
+          </h2>
+          <p>
+            Across all three years of the People's Money program, community
+            engagement has not just persisted, it has surged. The number of
+            proposals nearly doubled from Year 1 to Year 3, with the steepest
+            growth in Economic Stability needs.
+          </p>
+          <p>
+            The Year 2 dip is a reflection of a smaller dataset, not less need.
+            The community kept showing up. The question is whether the city is
+            listening.
+          </p>
+          <div class="trend-facts">
+            <div class="trend-fact">
+              <span class="trend-fact-number">3×</span>
+              <span class="trend-fact-text"
+                >Surge in Economic Stability proposals from Year 1 (334) to Year
+                3 (1,099)</span
+              >
+            </div>
+            <div class="trend-fact">
+              <span class="trend-fact-number">+82%</span>
+              <span class="trend-fact-text"
+                >Overall growth in total proposals across the three-year
+                program</span
+              >
+            </div>
+            <div class="trend-fact">
+              <span class="trend-fact-number">1,092</span>
+              <span class="trend-fact-text"
+                >Healthcare proposals in Year 3 alone — the domain's all-time
+                high</span
+              >
+            </div>
+          </div>
+        </div>
+        <div
+          class="chart-wrap"
+          style="
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.1);
+          "
+        >
+          <div class="chart-title" style="color: rgba(250, 248, 244, 0.6)">
+            Community Engagement Growth: Proposals by Domain
+          </div>
+          <canvas id="trendChart" height="320"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- BUSHWICK SPOTLIGHT -->
+    <section class="bushwick-section" id="bushwick">
+      <div class="bushwick-inner">
+        <span class="section-label fade-in">Neighborhood Spotlight</span>
+        <h2 class="section-head fade-in">Bushwick's <em>Triple Burden</em></h2>
+        <div class="col-text" style="margin: 0 0 20px">
+          <p class="fade-in">
+            Remember Rosa? She lives in Bushwick. The only neighborhood that
+            appears in the top five across <em>all three years</em> of the
+            program and across multiple domains. Her struggles are not personal
+            failures. They are systemic, and the data proves it.
+          </p>
+        </div>
+
+        <!-- Year tabs -->
+        <div class="tab-btns">
+          <button class="tab-btn active" onclick="showTab('year1')">
+            Year 1 Top Neighborhoods
+          </button>
+          <button class="tab-btn" onclick="showTab('year3')">
+            Year 3 Top Neighborhoods
+          </button>
+          <button class="tab-btn" onclick="showTab('bushwick')">
+            Bushwick Deep Dive
+          </button>
+        </div>
+
+        <div id="year1" class="tab-content active">
+          <div
+            class="chart-title"
+            style="text-align: left; margin-bottom: 20px; font-size: 13px"
+          >
+            Most burdened neighborhoods — Year 1
+          </div>
+          <canvas id="year1Chart" height="200"></canvas>
+        </div>
+        <div id="year3" class="tab-content">
+          <div
+            class="chart-title"
+            style="text-align: left; margin-bottom: 20px; font-size: 13px"
+          >
+            Most burdened neighborhoods — Year 3
+          </div>
+          <canvas id="year3Chart" height="200"></canvas>
+        </div>
+        <div id="bushwick" class="tab-content">
+          <div
+            class="chart-title"
+            style="text-align: left; margin-bottom: 20px; font-size: 13px"
+          >
+            Bushwick proposals by domain across all 3 years
+          </div>
+          <canvas id="bushwickChart" height="200"></canvas>
+        </div>
+
+        <div class="neighborhoods-grid" style="margin-top: 40px">
+          <div class="neighborhood-card highlight visible">
+            <span class="nbhd-num">88</span>
+            <div class="nbhd-name">Bushwick</div>
+            <div class="nbhd-tag">Year 1 · All 3 Domains · #1 in Year 3</div>
+          </div>
+          <div class="neighborhood-card">
+            <span class="nbhd-num">138</span>
+            <div class="nbhd-name">Hunts Point &amp; Longwood</div>
+            <div class="nbhd-tag">Year 1 · Highest Built Env't</div>
+          </div>
+          <div class="neighborhood-card">
+            <span class="nbhd-num">101</span>
+            <div class="nbhd-name">Jamaica</div>
+            <div class="nbhd-tag">Year 1 · Highest Healthcare</div>
+          </div>
+          <div class="neighborhood-card">
+            <span class="nbhd-num">94</span>
+            <div class="nbhd-name">East Flatbush</div>
+            <div class="nbhd-tag">Year 1 · Second highest overall</div>
+          </div>
+          <div class="neighborhood-card">
+            <span class="nbhd-num">44</span>
+            <div class="nbhd-name">Harlem</div>
+            <div class="nbhd-tag">Year 3 · Second highest overall</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLOSING PULL QUOTE -->
+    <div style="background: white; padding: 0 40px">
+      <div class="pull-quote fade-in" style="margin: 0 auto; max-width: 1100px">
+        <p>
+          Her struggles are not personal failures, they are systemic. The data
+          proves it year after year.
+        </p>
+        <cite>— Bushwick's Triple Burden Analysis</cite>
+      </div>
+    </div>
+
+    <!-- RECOMMENDATIONS -->
+    <section class="recs-section" id="action">
+      <div class="recs-inner">
+        <span class="section-label fade-in">What Must Change</span>
+        <h2 class="section-head fade-in">
+          Three domains. Three directives.<br /><em>One urgent call.</em>
+        </h2>
+        <p class="col-text fade-in" style="margin: 0 auto 0">
+          Effective policy must match the nature of this burden. Addressing
+          housing without healthcare, or healthcare without economic security,
+          is not enough. A coordinated, cross-domain investment is both a moral
+          imperative and a practical necessity.
+        </p>
+
+        <div class="recs-grid">
+          <div class="rec-card">
+            <div class="rec-num">01</div>
+            <div class="rec-domain">Economic Stability</div>
+            <h4>Expand Food &amp; Economic Security</h4>
+            <ul>
+              <li>
+                Scale meal delivery to senior centers in Bushwick, East Flatbush
+                &amp; Hunts Point
+              </li>
+              <li>
+                Fund financial counseling at community health centers in
+                high-proposal neighborhoods
+              </li>
+              <li>
+                Accommodate dietary restrictions (halal, vegetarian, vegan) for
+                equitable food access
+              </li>
+            </ul>
+          </div>
+          <div class="rec-card">
+            <div class="rec-num">02</div>
+            <div class="rec-domain">Healthcare Access</div>
+            <h4>Bring Healthcare to the Community</h4>
+            <ul>
+              <li>
+                Fund mobile clinic units in Jamaica/SE Queens, South Bronx &amp;
+                Harlem
+              </li>
+              <li>
+                Launch multilingual insurance enrollment programs for uninsured
+                residents
+              </li>
+              <li>
+                Link social services with healthcare to reduce fragmented system
+                navigation
+              </li>
+            </ul>
+          </div>
+          <div class="rec-card">
+            <div class="rec-num">03</div>
+            <div class="rec-domain">Built Environment</div>
+            <h4>Invest in Age-Friendly Infrastructure</h4>
+            <ul>
+              <li>
+                Mandate accessibility audits in top Built Env't proposal
+                neighborhoods
+              </li>
+              <li>
+                Implement fall-prevention programs: home safety, exercise,
+                sidewalk repair
+              </li>
+              <li>
+                Prioritize Hunts Point, Bushwick &amp; Brownsville for
+                infrastructure investment
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLOSING CTA -->
+    <section class="closing-section">
+      <div class="closing-inner">
+        <h2>
+          Rosa submitted her proposal.<br /><em
+            >Will anyone listen this time?</em
+          >
+        </h2>
+        <p>
+          Three years of data tell a consistent and urgent story. Neighborhoods
+          like Bushwick, Hunts Point &amp; Longwood, and East Flatbush are not
+          raising isolated concerns.
+        </p>
+        <p>
+          <strong
+            >They are raising the same compounding needs: economic, healthcare,
+            and environmental, year after year.</strong
+          >
+        </p>
+        <p>
+          The People's Money Program gives communities a voice. The question is
+          whether the city's leaders are prepared to act on what they hear.
+        </p>
+        <a
+          class="cta-btn"
+          href="https://www.nyc.gov/site/civicengagement/index.page"
+          target="_blank"
+          >Learn About People's Money →</a
+        >
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <p>
+        Research &amp; Analysis by
+        <strong style="color: rgba(255, 255, 255, 0.7)"
+          >Preethi Sridhar, Samiha Akter &amp; Soad Hossain</strong
+        >
+        · Team 10 · NYC Datathon 2026
+      </p>
+      <p>
+        Data source: NYC Civic Engagement Commission · People's Money Program ·
+        Years 1–3
+      </p>
+      <p style="margin-top: 16px">
+        Built for the NYC Community Datathon in partnership with the NYC Civic
+        Engagement Commission
+      </p>
+    </footer>
+
+    <script>
+      // ── PROGRESS BAR ──
+      window.addEventListener("scroll", () => {
+        const scrollTop = window.scrollY;
+        const docHeight =
+          document.documentElement.scrollHeight - window.innerHeight;
+        const pct = (scrollTop / docHeight) * 100;
+        document.getElementById("progress-bar").style.width = pct + "%";
+      });
+
+      // ── COUNTER ANIMATION ──
+      function animateCounter(el) {
+        const target = parseInt(el.dataset.target);
+        const duration = 1800;
+        const start = performance.now();
+        const update = (now) => {
+          const elapsed = now - start;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          el.textContent = Math.round(eased * target).toLocaleString();
+          if (progress < 1) requestAnimationFrame(update);
+        };
+        requestAnimationFrame(update);
+      }
+
+      const statObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target
+                .querySelectorAll("[data-target]")
+                .forEach(animateCounter);
+              statObserver.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.5 },
+      );
+      statObserver.observe(document.querySelector(".stat-bar"));
+
+      // ── SCROLL ANIMATIONS ──
+      const fadeObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.classList.add("visible");
+            }
+          });
+        },
+        { threshold: 0.15, rootMargin: "0px 0px -60px 0px" },
+      );
+
+      document
+        .querySelectorAll(
+          ".fade-in, .timeline-item, .domain-block, .trend-fact, .neighborhood-card, .rec-card",
+        )
+        .forEach((el) => {
+          fadeObserver.observe(el);
+        });
+
+      // ── TABS ──
+      function showTab(id) {
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((t) => t.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((b) => b.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+        event.target.classList.add("active");
+      }
+
+      // ── CHART DEFAULTS ──
+      Chart.defaults.font.family = "'DM Sans', sans-serif";
+      Chart.defaults.font.size = 12;
+      Chart.defaults.color = "#666";
+
+      const TEAL = "#1a7a6b";
+      const RED = "#c0392b";
+      const BLUE = "#2c5f8a";
+      const GOLD = "#b8860b";
+
+      // ── ECONOMIC CHART ──
+      new Chart(document.getElementById("economicChart"), {
+        type: "bar",
+        data: {
+          labels: ["Year 1", "Year 2", "Year 3"],
+          datasets: [
+            { label: "Bushwick", data: [15, 10, 27], backgroundColor: TEAL },
+            {
+              label: "Jackson Heights",
+              data: [15, 2, 0],
+              backgroundColor: GOLD,
+            },
+            { label: "Jamaica", data: [13, 0, 0], backgroundColor: RED },
+            { label: "Canarsie", data: [37, 4, 34], backgroundColor: BLUE },
+            {
+              label: "East Flatbush",
+              data: [32, 4, 30],
+              backgroundColor: "#8e44ad",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: { boxWidth: 10, font: { size: 11 } },
+            },
+          },
+          scales: {
+            x: { stacked: true, grid: { display: false } },
+            y: { stacked: true, grid: { color: "#f0f0f0" } },
+          },
+        },
+      });
+
+      // ── HEALTH CHART ──
+      new Chart(document.getElementById("healthChart"), {
+        type: "bar",
+        data: {
+          labels: ["Year 1", "Year 2", "Year 3"],
+          datasets: [
+            { label: "Jamaica", data: [101, 8, 25], backgroundColor: RED },
+            { label: "Bushwick", data: [39, 6, 21], backgroundColor: TEAL },
+            { label: "Bronx", data: [33, 3, 20], backgroundColor: BLUE },
+            { label: "Brownsville", data: [36, 4, 21], backgroundColor: GOLD },
+            { label: "Harlem", data: [33, 3, 19], backgroundColor: "#8e44ad" },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: { boxWidth: 10, font: { size: 11 } },
+            },
+          },
+          scales: {
+            x: { stacked: true, grid: { display: false } },
+            y: { stacked: true, grid: { color: "#f0f0f0" } },
+          },
+        },
+      });
+
+      // ── ENV CHART ──
+      new Chart(document.getElementById("envChart"), {
+        type: "bar",
+        data: {
+          labels: ["Year 1", "Year 2", "Year 3"],
+          datasets: [
+            {
+              label: "Hunts Point & Longwood",
+              data: [67, 9, 0],
+              backgroundColor: BLUE,
+            },
+            { label: "Bushwick", data: [46, 7, 19], backgroundColor: TEAL },
+            { label: "Brownsville", data: [37, 8, 18], backgroundColor: RED },
+            {
+              label: "East Elmhurst",
+              data: [33, 7, 16],
+              backgroundColor: GOLD,
+            },
+            {
+              label: "Manhattan",
+              data: [27, 6, 12],
+              backgroundColor: "#8e44ad",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: { boxWidth: 10, font: { size: 11 } },
+            },
+          },
+          scales: {
+            x: { stacked: true, grid: { display: false } },
+            y: { stacked: true, grid: { color: "#f0f0f0" } },
+          },
+        },
+      });
+
+      // ── TREND CHART ──
+      new Chart(document.getElementById("trendChart"), {
+        type: "line",
+        data: {
+          labels: ["Year 1", "Year 2", "Year 3"],
+          datasets: [
+            {
+              label: "Economic Stability",
+              data: [334, 153, 1099],
+              borderColor: BLUE,
+              backgroundColor: "rgba(44,95,138,0.1)",
+              tension: 0.4,
+              pointRadius: 6,
+              pointBackgroundColor: BLUE,
+              fill: true,
+            },
+            {
+              label: "Healthcare Access",
+              data: [737, 341, 1092],
+              borderColor: RED,
+              backgroundColor: "rgba(192,57,43,0.1)",
+              tension: 0.4,
+              pointRadius: 6,
+              pointBackgroundColor: RED,
+              fill: true,
+            },
+            {
+              label: "Neighborhood & Built Env't",
+              data: [655, 420, 848],
+              borderColor: TEAL,
+              backgroundColor: "rgba(26,122,107,0.1)",
+              tension: 0.4,
+              pointRadius: 6,
+              pointBackgroundColor: TEAL,
+              fill: true,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                color: "rgba(250,248,244,0.7)",
+                boxWidth: 10,
+                font: { size: 11 },
+              },
+            },
+          },
+          scales: {
+            x: {
+              grid: { color: "rgba(255,255,255,0.08)" },
+              ticks: { color: "rgba(250,248,244,0.6)" },
+            },
+            y: {
+              grid: { color: "rgba(255,255,255,0.08)" },
+              ticks: { color: "rgba(250,248,244,0.6)" },
+            },
+          },
+        },
+      });
+
+      // ── YEAR 1 CHART ──
+      new Chart(document.getElementById("year1Chart"), {
+        type: "bar",
+        data: {
+          labels: [
+            "Hunts Point & Longwood",
+            "East Flatbush",
+            "Bushwick",
+            "Brownsville",
+            "St. George/Stapleton",
+          ],
+          datasets: [
+            {
+              label: "Total Proposals",
+              data: [138, 94, 88, 81, 76],
+              backgroundColor: [BLUE, RED, TEAL, GOLD, "#8e44ad"],
+            },
+          ],
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: "#f0f0f0" } },
+            y: { grid: { display: false } },
+          },
+        },
+      });
+
+      // ── YEAR 3 CHART ──
+      new Chart(document.getElementById("year3Chart"), {
+        type: "bar",
+        data: {
+          labels: [
+            "Bushwick",
+            "Harlem",
+            "Canarsie",
+            "East Elmhurst",
+            "East Harlem",
+          ],
+          datasets: [
+            {
+              label: "Total Proposals",
+              data: [63, 44, 34, 33, 27],
+              backgroundColor: [TEAL, RED, GOLD, BLUE, "#8e44ad"],
+            },
+          ],
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: "#f0f0f0" } },
+            y: { grid: { display: false } },
+          },
+        },
+      });
+
+      // ── BUSHWICK CHART ──
+      new Chart(document.getElementById("bushwickChart"), {
+        type: "bar",
+        data: {
+          labels: ["Year 1", "Year 2", "Year 3"],
+          datasets: [
+            {
+              label: "Economic Stability",
+              data: [15, 10, 27],
+              backgroundColor: BLUE,
+            },
+            {
+              label: "Healthcare Access",
+              data: [27, 15, 18],
+              backgroundColor: RED,
+            },
+            {
+              label: "Neighborhood & Built Env't",
+              data: [46, 11, 18],
+              backgroundColor: TEAL,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: { boxWidth: 10, font: { size: 11 } },
+            },
+          },
+          scales: {
+            x: { stacked: true, grid: { display: false } },
+            y: {
+              stacked: true,
+              grid: { color: "#f0f0f0" },
+              title: { display: true, text: "Proposals" },
+            },
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
